@@ -1,21 +1,76 @@
+import { getAllUsers } from "../api/UserSerice";
+import { AgGridReact } from "ag-grid-react"; // AG Grid Component
+import "ag-grid-community/styles/ag-grid.css"; // Mandatory CSS required by the grid
+import "ag-grid-community/styles/ag-theme-quartz.css"; // Optional Theme applied to the grid
+import { useEffect, useState } from "react";
+import CustomActionButton from "../components/CustomActionButton";
+import Dialog from "../components/Dialog";
+import { FaRegEdit } from "react-icons/fa";
+
 const Dashboard = () => {
-    return (
-        <div className="grid grid-cols-4 gap-4 bg-gray-200 p-4 border border-gray-300">
-        {/* Row 1 */}
-        <div className="bg-gray-700 text-white p-4">Column 1, Row 1</div>
-        <div className="bg-gray-600 p-4">Column 2, Row 1</div>
-        <div className="bg-gray-600 p-4">Column 3, Row 1</div>
-        <div className="bg-gray-700 text-white p-4">Column 4, Row 1</div>
-  
-        {/* Row 2 */}
-        <div className="bg-gray-700 text-white p-4">Column 1, Row 2</div>
-        <div className="bg-gray-600 p-4">Column 2, Row 2</div>
-        <div className="bg-gray-600 p-4">Column 3, Row 2</div>
-        <div className="bg-gray-700 text-white p-4">Column 4, Row 2</div>
-  
-        {/* Add more rows as needed */}
-      </div>
-    );
+  // Row Data: The data to be displayed.
+  const [rowData, setRowData] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [data, setData] = useState({});
+  const [refesh,setRefresh] = useState(true);
+
+  const handleOpenDialog = (data) => {
+    setData(data);
+    setIsDialogOpen(true);
   };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
+  // Column Definitions: Defines the columns to be displayed.
+  const [colDefs, setColDefs] = useState([
+    { field: "firstName" },
+    { field: "lastName" },
+    { field: "birthDate" },
+    { field: "userName" },
+    {
+      field: "roles",
+      valueGetter: (param) => {
+        const roles = param?.data?.roles?.map((role) => role.name);
+        return roles.join(" | ");
+      },
+    },
+    { headerName: "Action", cellRenderer: CustomActionButton, cellRendererParams:{
+        onClick: handleOpenDialog,
+        buttonIcon: <FaRegEdit />
+    }, width: 90 },
+  ]);
+
+  useEffect(() => {
+    getAllUsers().then((response) => {
+      if (response.status == 200) {
+        setRowData(response.data);
+      }
+    });
+  }, [refesh]);
+
+
   
-  export default Dashboard;
+  return (
+    <div className={`min-w-[800px] w-3/5 mx-auto h-full`}>
+      <div
+        className="ag-theme-quartz h-[800px] w-full mt-2" // applying the grid theme
+      >
+        <AgGridReact rowData={rowData} columnDefs={colDefs} />
+      </div>
+      <div className="container mx-auto p-4">
+      {/* Display your main content here */}
+      {/* <button
+        onClick={handleOpenDialog}
+        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+      >
+        Open Dialog
+      </button> */}
+      <Dialog isOpen={isDialogOpen} onClose={handleCloseDialog} data={data} setRefresh={setRefresh}/>
+    </div>
+    </div>
+  );
+};
+
+export default Dashboard;

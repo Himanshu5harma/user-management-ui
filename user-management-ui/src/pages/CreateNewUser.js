@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import CustomInput from "../components/CustomInput";
 import { createNewUser } from "../api/UserSerice";
 import {useNavigate} from "react-router-dom";
+import { LOGIN_ROUTE_PATH } from "../data/Constant";
 const CreateNewUser = () => {
   const [firstName, setFirstname] = useState("");
   const [lastName, setLastname] = useState("");
@@ -30,14 +30,12 @@ const CreateNewUser = () => {
       // Here you can handle form submission, e.g., validate input, send login request, etc.
       createNewUser(requsetPayload).then((response) => {
         if (response.status == 200) {
-          navigate("/login");
+          navigate(LOGIN_ROUTE_PATH);
         }
       });
     },
     [firstName, lastName, birthDate, userName, password]
   );
-
-  useEffect(() => console.log(birthDate), [birthDate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

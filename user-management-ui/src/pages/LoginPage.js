@@ -1,22 +1,40 @@
 import React, { useCallback, useState } from "react";
 import { getEntitlement } from "../api/AuthService";
-import { useNavigate ,Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { HOME_ROUTE_PATH, NEW_USER_ROUTE_PATH } from "../data/Constant";
+import { decodeToken } from "../utils/utils";
 
-const LoginPage = () => {
+const LoginPage = ({ setCurrentUser }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [hasError, setHasError] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = useCallback((e) => {
-    e.preventDefault();
-    // Here you can handle form submission, e.g., validate input, send login request, etc.
-    getEntitlement({ username, password }).then((response) => {
-      if (response.status == 200) {
-        localStorage.setItem("token", response?.data?.jwt);
-        navigate("/");
-      }
-    });
-  },[username,password]);
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      // Here you can handle form submission, e.g., validate input, send login request, etc.
+      getEntitlement({ username, password })
+        .then((response) => {
+          if (response.status == 200) {
+            localStorage.setItem("token", response?.data?.jwt);
+            const userDetails = decodeToken(response?.data?.jwt);
+            if (typeof userDetails === "object") {
+              const { firstName, lastName } = userDetails;
+              setCurrentUser({ firstName, lastName });
+            }
+
+            navigate(HOME_ROUTE_PATH);
+          } else {
+            throw new Error("An error occurred in");
+          }
+        })
+        .catch((error) => {
+          setHasError(true);
+        });
+    },
+    [username, password]
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -61,7 +79,11 @@ const LoginPage = () => {
               />
             </div>
           </div>
-
+          {hasError && (
+            <div className="text-red-500 text-sm w-full text-center font-thin">
+              Incorrect Username or Password
+            </div>
+          )}
           <div>
             <button
               type="submit"
@@ -71,11 +93,11 @@ const LoginPage = () => {
             </button>
           </div>
           <div>
-          <div>
-          <h2 className="mt-6 text-center text-sm font-light hover:underline">
-            <Link to="/new-user">Create new Account</Link>
-          </h2>
-        </div>
+            <div>
+              <h2 className="mt-6 text-center text-sm font-light hover:underline">
+                <Link to={NEW_USER_ROUTE_PATH}>Create new Account</Link>
+              </h2>
+            </div>
           </div>
         </form>
       </div>
