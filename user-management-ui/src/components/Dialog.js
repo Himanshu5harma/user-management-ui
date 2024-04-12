@@ -1,15 +1,17 @@
 // Dialog.js
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CustomButton from "./CustomButton";
 import CustomSecondaryButton from "./CustomSecondaryButton";
 import { getAllRoles } from "../api/RolesService";
 import { createNewUser } from "../api/UserSerice";
 import { ACCESS_MAP } from "../data/Constant";
+import { ErrorContext } from "../app/base/Contexts";
 
 const Dialog = ({ isOpen, onClose, data, setRefresh, activeRolePremissions}) => {
   const [editedData, setEditedData] = useState(data);
   const [allRoles, setAllRoles] = useState([]);
   const [checkedRoles, setCheckedRoles] = useState({});
+  const {setError} = useContext(ErrorContext);
   
   // Fetch All Roles;
   useEffect(()=>{
@@ -17,7 +19,9 @@ const Dialog = ({ isOpen, onClose, data, setRefresh, activeRolePremissions}) => 
       if(response.status === 200){
         setAllRoles(response?.data);
       }
-    })
+    }).catch((error)=>{
+      setError(error?.response?.data?.message);
+    });
   },[]);
 
   useEffect(() => setEditedData(data), [data]);
@@ -59,7 +63,9 @@ const Dialog = ({ isOpen, onClose, data, setRefresh, activeRolePremissions}) => 
         handleClose();
         setRefresh(prev=> !prev);
       }
-    })
+    }).catch((error)=>{
+      setError(error?.response?.data?.message);
+    });
     // Handle the edit action (e.g., save to backend, update state, etc.)
     onClose();
   };

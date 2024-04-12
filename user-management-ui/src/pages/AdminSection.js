@@ -11,7 +11,7 @@ import PermissionDialog from "../components/PermissionDialog";
 import { deletePermission } from "../api/PermissionService";
 import AddRoleDialog from "../components/AddRoleDialog";
 import { ADMIN_ROLE, ADMIN_ROUTE_PATH, HOME_ROUTE_PATH, UN_AUTHORIZED_ROUTE_PATH } from "../data/Constant";
-import { AuthContext } from "../app/base/Contexts";
+import { AuthContext, ErrorContext } from "../app/base/Contexts";
 import { useNavigate } from "react-router-dom";
 
 const AdminSection = (props) => {
@@ -21,6 +21,8 @@ const AdminSection = (props) => {
   const [openRoleDialog, setOpenRoleDialog] = useState(false);
   const [editRole, setEditRole] = useState();
   const currentUser = useContext(AuthContext);
+  const {setError} = useContext(ErrorContext);
+  
   const navigate = useNavigate();
   useEffect(() => {
     getAllRolesAndPermissions().then((response) => {
@@ -28,6 +30,8 @@ const AdminSection = (props) => {
         setRolesData(response?.data?.roles);
         setPermData(response?.data?.permissions);
       }
+    }).catch((error)=>{
+      setError(error?.response?.data?.message);
     });
   }, [openPermDialog, openRoleDialog]);
   if(currentUser?.activeRole != ADMIN_ROLE){
@@ -38,7 +42,9 @@ const AdminSection = (props) => {
       if (response.status == 200) {
         setPermData(response.data);
       }
-    });
+    }).catch((error)=>{
+      setError(error?.response?.data?.message);
+    });;
   };
 
   const deleteRoleHandler = (data) => {
@@ -47,6 +53,8 @@ const AdminSection = (props) => {
         setRolesData(response?.data?.roles);
         setPermData(response?.data?.permissions);
       }
+    }).catch((error)=>{
+      setError(error?.response?.data?.message);
     });
   };
 

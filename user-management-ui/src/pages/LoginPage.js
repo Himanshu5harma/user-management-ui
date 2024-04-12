@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import bcrypt from 'bcryptjs';
 import { getEntitlement } from "../api/AuthService";
 import { useNavigate, Link } from "react-router-dom";
@@ -9,11 +9,14 @@ import {
   saltRounds,
 } from "../data/Constant";
 import { decodeToken } from "../utils/utils";
+import { ErrorContext } from "../app/base/Contexts";
 
 const LoginPage = ({ setCurrentUser }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [hasError, setHasError] = useState(false);
+  const {error, setError} = useContext(ErrorContext);
+
   const navigate = useNavigate();
 
   const handleSubmit = useCallback(
@@ -46,7 +49,7 @@ const LoginPage = ({ setCurrentUser }) => {
           }
         })
         .catch((error) => {
-          setHasError(true);
+          setError(error?.response?.data?.message);
         });
     },
     [username, password]

@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { DASHBOARD_ROUTE_PATH, LOGIN_ROUTE_PATH } from "../data/Constant";
 import { getAllRoles } from "../api/RolesService";
-import { RolesContext } from "../app/base/Contexts";
+import { ErrorContext, RolesContext } from "../app/base/Contexts";
 
 const Home = (props) => {
   const isAuthenticated = useAuth();
   const navigate = useNavigate();
   const allRoles = useContext(RolesContext);
+  const {error, setError} = useContext(ErrorContext);
   if (!isAuthenticated) 
     navigate(LOGIN_ROUTE_PATH);
   const { setAllRoles } = props;
@@ -20,7 +21,9 @@ const Home = (props) => {
         if (response.status === 200) {
           setAllRoles(response?.data);
         }
-      });
+      }).catch((error)=>{
+        setError(error?.response?.data?.message);
+      });;
     }
   }, []);
 

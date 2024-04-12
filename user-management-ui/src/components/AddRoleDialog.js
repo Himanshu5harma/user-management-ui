@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CustomDialog from "./CustomDialog";
 import { createNewRole } from "../api/RolesService";
+import { ErrorContext } from "../app/base/Contexts";
 
 const AddRoleDialog = ({ isOpen, onClose, permissions, editRole }) => {
   const [role, setRole] = useState(
     editRole ? editRole : { name: "", permissions: [] }
   );
-  const [error, setError] = useState("");
   const [checkedPerms, setCheckedPerms] = useState({});
+  const {setError} = useContext(ErrorContext);
 
   useEffect(() => {
     permissions.forEach((element) => {
@@ -52,9 +53,8 @@ const AddRoleDialog = ({ isOpen, onClose, permissions, editRole }) => {
           handleClose();
           setError("");
         }
-      })
-      .catch((error) => {
-        setError("Error oucered Role not create !");
+      }).catch((error)=>{
+        setError(error?.response?.data?.message);
       });
   };
 
@@ -96,9 +96,6 @@ const AddRoleDialog = ({ isOpen, onClose, permissions, editRole }) => {
           ))}
         </div>
       </div>
-      {/* <div className="text-red-500 text-sm w-full text-right font-thin">
-        {error}
-      </div> */}
     </div>
   );
 

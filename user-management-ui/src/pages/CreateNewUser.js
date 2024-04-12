@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import bcrypt from 'bcryptjs';
 import CustomInput from "../components/CustomInput";
 import { createNewUser } from "../api/UserSerice";
 import {useNavigate} from "react-router-dom";
 import { LOGIN_ROUTE_PATH, saltRounds } from "../data/Constant";
+import { ErrorContext } from "../app/base/Contexts";
 const CreateNewUser = () => {
   const [firstName, setFirstname] = useState("");
   const [lastName, setLastname] = useState("");
@@ -11,6 +12,7 @@ const CreateNewUser = () => {
   const [password, setPassword] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const navigate = useNavigate();
+  const {error, setError} = useContext(ErrorContext);
 
   const createNewUserHandler = useCallback(
     async (e) => {
@@ -33,6 +35,9 @@ const CreateNewUser = () => {
         if (response.status == 200) {
           navigate(LOGIN_ROUTE_PATH);
         }
+      }).catch(error=>{
+        console.log(error);
+        setError(error?.response?.data?.message);
       });
     },
     [firstName, lastName, birthDate, userName, password]
@@ -105,7 +110,6 @@ const CreateNewUser = () => {
               />
             </div>
           </div>
-
           <div>
             <button
               type="submit"

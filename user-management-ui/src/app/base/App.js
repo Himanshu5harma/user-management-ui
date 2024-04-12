@@ -21,14 +21,16 @@ import {
   SESSION_EXPIRED_ROUTE_PATH,
   UN_AUTHORIZED_ROUTE_PATH,
 } from "../../data/Constant";
-import { AuthContext, RolesContext } from "./Contexts";
+import { AuthContext, ErrorContext, RolesContext } from "./Contexts";
 import RoleSelection from "../../pages/RoleSelection";
 import Unauthorized from "../error/Unauthorized";
 import Spinner from "../../components/Spinner";
+import ErrorBoundary from "../error/ErrorBoundary";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
   const [allRoles, setAllRoles] = useState([]);
+  const [error, setError] =useState('');
   
   const updatedAcitveRole = (newAcitveRole) => {
     setCurrentUser((prev) => ({ ...prev, activeRole: newAcitveRole }));
@@ -38,7 +40,9 @@ function App() {
   return (
     <AuthContext.Provider value={currentUser}>
       <RolesContext.Provider value={allRoles}>
+        <ErrorContext.Provider value={{error,setError}}>
         <div className={`App`}>
+          <ErrorBoundary error ={error} setError={setError}/>
           <BrowserRouter>
             <Routes>
               <Route path={LOGIN_ROUTE_PATH} element={<LoginPage setCurrentUser={setCurrentUser} />} />
@@ -56,6 +60,7 @@ function App() {
             </Routes>
           </BrowserRouter>
         </div>
+        </ErrorContext.Provider>
       </RolesContext.Provider>
     </AuthContext.Provider>
   );

@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import CustomActionButton from "../components/CustomActionButton";
 import Dialog from "../components/Dialog";
 import { FaRegEdit } from "react-icons/fa";
-import { AuthContext, RolesContext } from "../app/base/Contexts";
+import { AuthContext, ErrorContext, RolesContext } from "../app/base/Contexts";
 import { getActiveRolePermissions } from "../utils/utils";
 import { ACCESS_MAP } from "../data/Constant";
 import Spinner from "../components/Spinner";
@@ -21,6 +21,7 @@ const Dashboard = (props) => {
   const [reRender, setReRender] = useState(false);
   const allRoles = useContext(RolesContext);
   const currentUser = useContext(AuthContext);
+  const {setError}  = useContext(ErrorContext);
   const [gridApi, setGridApi] = useState(null);
   const [loading, setLoading] = useState(false);
   const gridRef = useRef();
@@ -62,11 +63,16 @@ const Dashboard = (props) => {
 
   useEffect(() => {
     setLoading(true);
-    getAllUsers().then((response) => {
-      if (response.status == 200) {
-        setRowData(response.data);
-      }
-    }).finally(()=>setLoading(false));
+    getAllUsers()
+      .then((response) => {
+        if (response.status == 200) {
+          setRowData(response.data);
+        }
+      })
+      .catch((error) => {
+        setError(error?.response?.data?.message);
+      })
+      .finally(() => setLoading(false));
   }, [refesh]);
 
   // useEffect(()=> {

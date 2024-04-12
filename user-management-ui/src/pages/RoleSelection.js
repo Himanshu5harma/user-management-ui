@@ -31,7 +31,8 @@ const RoleSelection = ({updatedAcitveRole}) => {
   };
 
   return (
-    <div className="flex content-center w-full max-w-lg mx-auto mt-44 space-x-4">
+    <div className="flex content-center w-full h-full p-10">
+      <div className="flex max-w-lg mx-auto mt-64 space-x-4">
       <div>
         <label
           htmlFor="role"
@@ -48,6 +49,7 @@ const RoleSelection = ({updatedAcitveRole}) => {
         className="mt-1 uppercase w-full"
         placeholder="Select a role..."
       />
+      </div>
     </div>
   );
 };

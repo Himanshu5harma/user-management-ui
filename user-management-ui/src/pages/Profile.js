@@ -1,20 +1,22 @@
 import React, { useContext, useEffect, useState } from "react";
 import CustomButton from "../components/CustomButton";
-import CustomSecondaryButton from "../components/CustomSecondaryButton";
-import { AuthContext } from "../app/base/Contexts";
+import { AuthContext, ErrorContext } from "../app/base/Contexts";
 import { createNewUser, getUserByUserName } from "../api/UserSerice";
+import { decodeToken } from "../utils/utils";
 
 const Profile = ({}) => {
   const [editedData, setEditedData] = useState({});
   const currentUser = useContext(AuthContext);
+  const {error, setError} = useContext(ErrorContext);
 
   useEffect(() => {
-    const { username } = currentUser;
-    console.log("current User ", currentUser);
-    getUserByUserName(username).then((response) => {
+    const token = localStorage.getItem('token');
+    getUserByUserName(decodeToken(token)?.sub).then((response) => {
       if (response.status === 200) {
         setEditedData(response.data);
       }
+    }).catch((error)=>{
+      setError(error?.response?.data?.message);
     });
   }, []);
 
@@ -31,7 +33,9 @@ const Profile = ({}) => {
         if(response.status === 200){
         //   setRefresh(prev=> !prev);
         }
-      })
+      }).catch((error)=>{
+        setError(error?.response?.data?.message);
+      });
       // Handle the edit action (e.g., save to backend, update state, etc.)
     //   onClose();
   };

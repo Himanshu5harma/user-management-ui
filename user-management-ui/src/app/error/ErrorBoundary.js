@@ -1,28 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 
-function ErrorBoundary({ children }) {
-  const [hasError, setHasError] = useState(false);
-
-  const componentDidCatch = (error, errorInfo) => {
-    console.error('Error caught:', error, errorInfo);
-    setHasError(true);
-  };
-
-  if (hasError) {
-    return (
-      <div className="bg-red-100 p-4 rounded-lg shadow-md">
-        <h2 className="text-red-600 font-semibold text-lg mb-2">
-          Something went wrong.
-        </h2>
-        <p className="text-gray-700">
-          We apologize for the inconvenience. Our team has been notified.
-        </p>
-        {/* You can add additional error information or links here */}
+function ErrorBoundary({ error, setError }) {
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => setError(""), 3000);
+    }
+  }, [error]);
+  return error ? (
+    <div className=" z-40 flex w-full fixed">
+      <div className="bg-red-600 text-white p-2 px-4 rounded-lg shadow-md mt-5 mx-auto animate-bounce ">
+        {error}
       </div>
-    );
-  }
-
-  return children;
+    </div>
+  ) : (
+    <></>
+  );
 }
 
 export default ErrorBoundary;

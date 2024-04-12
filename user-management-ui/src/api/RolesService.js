@@ -21,5 +21,7 @@ export const createNewRole = async (role) => {
 };
 
 export const deleteRole = async (id) => {
-  return await axios.delete(baseUrl + `/api/v1/roles/delete-role/${id}`);
+  return await axios.delete(baseUrl + `/api/v1/roles/delete-role/${id}`,{
+    headers: { ...getHeaderToken() },
+  });
 };

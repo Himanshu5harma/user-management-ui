@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import CustomDialog from "./CustomDialog";
 import { createNewPermission } from "../api/PermissionService";
+import { ErrorContext } from "../app/base/Contexts";
 
 const PermissionDialog = ({ isOpen, onClose }) => {
   const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const {error, setError} = useContext(ErrorContext);
 
   const handleInputChange = (e) => setName(e?.target?.value);
   
@@ -22,7 +23,7 @@ const PermissionDialog = ({ isOpen, onClose }) => {
         }
       })
       .catch((error) => {
-        setError("Error oucered permission not create !");
+        setError(error?.response?.data?.message);
       });
   };
 
@@ -40,9 +41,6 @@ const PermissionDialog = ({ isOpen, onClose }) => {
           onChange={handleInputChange}
           className="w-full border rounded-md p-2"
         />
-      </div>
-      <div className="text-red-500 text-sm w-full text-right font-thin">
-        {error}
       </div>
     </div>
   );
