@@ -1,36 +1,52 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { LOGIN_ROUTE_PATH } from "../data/Constant";
+import { DASHBOARD_ROUTE_PATH, LOGIN_ROUTE_PATH } from "../data/Constant";
+import { getAllRoles } from "../api/RolesService";
+import { RolesContext } from "../app/base/Contexts";
 
 const Home = (props) => {
   const isAuthenticated = useAuth();
   const navigate = useNavigate();
-  if (!isAuthenticated) navigate(LOGIN_ROUTE_PATH);
+  const allRoles = useContext(RolesContext);
+  if (!isAuthenticated) 
+    navigate(LOGIN_ROUTE_PATH);
+  const { setAllRoles } = props;
+
+  useEffect(() => {
+    console.log("form home");
+    if (!(allRoles && allRoles.length !== 0)) {
+      getAllRoles().then((response) => {
+        if (response.status === 200) {
+          setAllRoles(response?.data);
+        }
+      });
+    }
+  }, []);
 
   return (
-    <div>
-      <div className="flex justify-center items-center h-screen">
-        <div className="grid grid-cols-3 gap-4">
-          {/* Tile 1 */}
-          <div className="bg-gray-200 p-4 text-center rounded-lg">
-            <img src="image1.png" alt="Image 1" className="w-52 h-52 mx-auto" />
-            <p className="mt-2">Option 1</p>
-          </div>
-
-          {/* Tile 2 */}
-          <div className="bg-gray-200 p-4 text-center rounded-lg">
-            <img src="image2.png" alt="Image 2" className="w-52 h-52 mx-auto" />
-            <p className="mt-2">Option 2</p>
-          </div>
-
-          {/* Tile 3 */}
-          <div className="bg-gray-200 p-4 text-center rounded-lg">
-            <img src="image3.png" alt="Image 3" className="w-52 h-52 mx-auto" />
-            <p className="mt-2">Option 3</p>
-          </div>
-        </div>
-      </div>
+    <div className="bg-gray-100 min-h-screen">
+      <main className="container mx-auto p-4 pt-40">
+        <p className="text-4xl mb-4">Welcome to the User Management System! </p>
+        <p className="text-xl mb-4">
+          This application allows you to efficiently manage user accounts,
+          roles, and permissions.
+        </p>
+        <p className="text-gray-600 mb-4 text-xl">
+          Key features:
+          <ul className="list-disc ml-6">
+            <li>Create, edit, and delete user accounts</li>
+            <li>Assign roles (e.g., admin, user, manager)</li>
+            <li>Control access to specific features based on user roles</li>
+          </ul>
+        </p>
+        <button
+          onClick={()=> navigate(DASHBOARD_ROUTE_PATH)}
+          className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md inline-block"
+        >
+          Go to Dashboard
+        </button>
+      </main>
     </div>
   );
 };

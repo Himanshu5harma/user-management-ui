@@ -1,7 +1,13 @@
 import React, { useCallback, useState } from "react";
+import bcrypt from 'bcryptjs';
 import { getEntitlement } from "../api/AuthService";
 import { useNavigate, Link } from "react-router-dom";
-import { HOME_ROUTE_PATH, NEW_USER_ROUTE_PATH } from "../data/Constant";
+import {
+  HOME_ROUTE_PATH,
+  NEW_USER_ROUTE_PATH,
+  NO_ROLE_SELECTED,
+  saltRounds,
+} from "../data/Constant";
 import { decodeToken } from "../utils/utils";
 
 const LoginPage = ({ setCurrentUser }) => {
@@ -11,17 +17,27 @@ const LoginPage = ({ setCurrentUser }) => {
   const navigate = useNavigate();
 
   const handleSubmit = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       // Here you can handle form submission, e.g., validate input, send login request, etc.
-      getEntitlement({ username, password })
+      getEntitlement({ username, password
+        // : await bcrypt.hash(password,saltRounds) 
+      })
         .then((response) => {
           if (response.status == 200) {
             localStorage.setItem("token", response?.data?.jwt);
             const userDetails = decodeToken(response?.data?.jwt);
             if (typeof userDetails === "object") {
-              const { firstName, lastName } = userDetails;
-              setCurrentUser({ firstName, lastName });
+              const { firstName, lastName, roles, sub:username } = userDetails;
+              const userRoles = roles.map((role) => role.authority);
+              setCurrentUser((prev)=>({
+                firstName,
+                lastName,
+                username,
+                roles: userRoles,
+                activeRole:
+                  userRoles.length == 1 ? userRoles[0] : NO_ROLE_SELECTED,
+              }));
             }
 
             navigate(HOME_ROUTE_PATH);

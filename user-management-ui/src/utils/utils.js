@@ -17,3 +17,7 @@ export const decodeToken = (token) => {
   }
   return "Please pass Token";
 };
+
+export const getActiveRolePermissions = (allRoles, activeRole) => {
+    return allRoles.filter(role=>role.name.includes(activeRole.split('_')[1]))[0]?.permissions.map(perm=>perm.name)
+};

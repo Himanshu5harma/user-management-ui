@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import bcrypt from 'bcryptjs';
 import CustomInput from "../components/CustomInput";
 import { createNewUser } from "../api/UserSerice";
 import {useNavigate} from "react-router-dom";
-import { LOGIN_ROUTE_PATH } from "../data/Constant";
+import { LOGIN_ROUTE_PATH, saltRounds } from "../data/Constant";
 const CreateNewUser = () => {
   const [firstName, setFirstname] = useState("");
   const [lastName, setLastname] = useState("");
@@ -12,7 +13,7 @@ const CreateNewUser = () => {
   const navigate = useNavigate();
 
   const createNewUserHandler = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       const requsetPayload = {
         firstName,

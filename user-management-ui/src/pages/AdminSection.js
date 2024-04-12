@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { deleteRole, deleteRolePermission, getAllRoles, getAllRolesAndPermissions } from "../api/RolesService";
+import React, { useContext, useEffect, useState } from "react";
+import { deleteRole, getAllRolesAndPermissions } from "../api/RolesService";
 import { AgGridReact } from "ag-grid-react"; // AG Grid Component
 import "ag-grid-community/styles/ag-grid.css"; // Mandatory CSS required by the grid
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -10,6 +10,9 @@ import CustomButton from "../components/CustomButton";
 import PermissionDialog from "../components/PermissionDialog";
 import { deletePermission } from "../api/PermissionService";
 import AddRoleDialog from "../components/AddRoleDialog";
+import { ADMIN_ROLE, ADMIN_ROUTE_PATH, HOME_ROUTE_PATH, UN_AUTHORIZED_ROUTE_PATH } from "../data/Constant";
+import { AuthContext } from "../app/base/Contexts";
+import { useNavigate } from "react-router-dom";
 
 const AdminSection = (props) => {
   const [rolesData, setRolesData] = useState([]);
@@ -17,7 +20,8 @@ const AdminSection = (props) => {
   const [openPermDialog, setOpenPermDialog] = useState(false);
   const [openRoleDialog, setOpenRoleDialog] = useState(false);
   const [editRole, setEditRole] = useState();
-
+  const currentUser = useContext(AuthContext);
+  const navigate = useNavigate();
   useEffect(() => {
     getAllRolesAndPermissions().then((response) => {
       if (response.status == 200) {
@@ -26,7 +30,9 @@ const AdminSection = (props) => {
       }
     });
   }, [openPermDialog, openRoleDialog]);
-
+  if(currentUser?.activeRole != ADMIN_ROLE){
+    navigate(UN_AUTHORIZED_ROUTE_PATH);
+  }
   const deleteHandler = (data) => {
     deletePermission(data?.id).then((response) => {
       if (response.status == 200) {
@@ -52,7 +58,7 @@ const AdminSection = (props) => {
         const permissions = param?.data?.permissions?.map((p) => p.name);
         return permissions.join(" | ");
       },
-      width: 180,
+      width: 250,
     },
     {
       headerName: "Action",
@@ -88,7 +94,7 @@ const AdminSection = (props) => {
   return (
     <div className="flex space-x-10 justify-center">
       <div>
-        <div className="ag-theme-quartz  w-[485px] mt-2 h-80">
+        <div className="ag-theme-quartz  w-[560px] mt-2 h-80">
           <AgGridReact rowData={rolesData} columnDefs={rolesColDefs} />
           <div className="flex justify-center">
             <div className="w-24 mt-3">

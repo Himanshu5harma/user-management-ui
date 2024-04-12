@@ -1,5 +1,6 @@
 import axios from 'axios';
+import { baseUrl } from '../data/Constant';
 
 export const getEntitlement = async (loginDetails) =>{
-    return await axios.post('http://localhost:8080/authenticate',loginDetails)
+    return await axios.post(baseUrl+'/authenticate',loginDetails)
 }

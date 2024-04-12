@@ -17,37 +17,46 @@ import {
   LOGIN_ROUTE_PATH,
   NEW_USER_ROUTE_PATH,
   PROFILE_ROUTE_PATH,
+  ROLE_SELECTION_ROUTE_PATH,
   SESSION_EXPIRED_ROUTE_PATH,
+  UN_AUTHORIZED_ROUTE_PATH,
 } from "../../data/Constant";
-import { AuthContext } from "./Contexts";
+import { AuthContext, RolesContext } from "./Contexts";
+import RoleSelection from "../../pages/RoleSelection";
+import Unauthorized from "../error/Unauthorized";
+import Spinner from "../../components/Spinner";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
+  const [allRoles, setAllRoles] = useState([]);
+  
+  const updatedAcitveRole = (newAcitveRole) => {
+    setCurrentUser((prev) => ({ ...prev, activeRole: newAcitveRole }));
+  };
 
+  useEffect(() => console.log(currentUser?.activeRole), [currentUser]);
   return (
     <AuthContext.Provider value={currentUser}>
-      <div className={`App`}>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path={LOGIN_ROUTE_PATH}
-              element={<LoginPage setCurrentUser={setCurrentUser} />}
-            />
-            <Route path={NEW_USER_ROUTE_PATH} element={<CreateNewUser />} />
-            <Route
-              path={SESSION_EXPIRED_ROUTE_PATH}
-              element={<SessionExpired />}
-            />
-            <Route element={<ProtectedRoutes />}>
-              <Route path={HOME_ROUTE_PATH} element={<Home />} />
-              <Route path={PROFILE_ROUTE_PATH} element={<Profile />} />
-              <Route path={DASHBOARD_ROUTE_PATH} element={<Dashboard />} />
-              <Route path={ADMIN_ROUTE_PATH} element={<AdminSection />} />
-            </Route>
-            <Route path="*" element={<PageNotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
+      <RolesContext.Provider value={allRoles}>
+        <div className={`App`}>
+          <BrowserRouter>
+            <Routes>
+              <Route path={LOGIN_ROUTE_PATH} element={<LoginPage setCurrentUser={setCurrentUser} />} />
+              <Route path={NEW_USER_ROUTE_PATH} element={<CreateNewUser />} />
+              <Route path={SESSION_EXPIRED_ROUTE_PATH} element={<SessionExpired />} />
+              <Route path={UN_AUTHORIZED_ROUTE_PATH} element={<Unauthorized />} />
+              <Route path={ROLE_SELECTION_ROUTE_PATH} element={  <RoleSelection updatedAcitveRole={updatedAcitveRole} /> } />
+              <Route element={  <ProtectedRoutes updatedAcitveRole={updatedAcitveRole} setCurrentUser={setCurrentUser}/> } >
+                <Route  path={HOME_ROUTE_PATH} element={<Home setAllRoles={setAllRoles} />} />
+                <Route path={PROFILE_ROUTE_PATH} element={<Profile />} />
+                <Route path={DASHBOARD_ROUTE_PATH} element={<Dashboard />} />
+                <Route path={ADMIN_ROUTE_PATH} element={<AdminSection />} />
+              </Route>
+              <Route path="*" element={<PageNotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
+      </RolesContext.Provider>
     </AuthContext.Provider>
   );
 }

@@ -1,19 +1,30 @@
+import React, { useCallback, useRef } from "react";
 import { getAllUsers } from "../api/UserSerice";
 import { AgGridReact } from "ag-grid-react"; // AG Grid Component
 import "ag-grid-community/styles/ag-grid.css"; // Mandatory CSS required by the grid
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Optional Theme applied to the grid
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CustomActionButton from "../components/CustomActionButton";
 import Dialog from "../components/Dialog";
 import { FaRegEdit } from "react-icons/fa";
+import { AuthContext, RolesContext } from "../app/base/Contexts";
+import { getActiveRolePermissions } from "../utils/utils";
+import { ACCESS_MAP } from "../data/Constant";
+import Spinner from "../components/Spinner";
 
-const Dashboard = () => {
+const Dashboard = (props) => {
   // Row Data: The data to be displayed.
   const [rowData, setRowData] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [data, setData] = useState({});
   const [refesh,setRefresh] = useState(true);
-
+  const [reRender, setReRender] = useState(false);
+  const allRoles = useContext(RolesContext);
+  const currentUser = useContext(AuthContext);
+  const [gridApi, setGridApi] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const gridRef = useRef();
+  // const onGrid
   const handleOpenDialog = (data) => {
     setData(data);
     setIsDialogOpen(true);
@@ -22,6 +33,10 @@ const Dashboard = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
   };
+  const checkPermission = ()=>{
+    const permissions = getActiveRolePermissions(allRoles, currentUser.activeRole)
+    return ACCESS_MAP.grantRole.filter(p=>permissions.filter(per =>per == p).length).length == 0;
+  }
 
   // Column Definitions: Defines the columns to be displayed.
   const [colDefs, setColDefs] = useState([
@@ -38,38 +53,39 @@ const Dashboard = () => {
     },
     { headerName: "Action", cellRenderer: CustomActionButton, cellRendererParams:{
         onClick: handleOpenDialog,
-        buttonIcon: <FaRegEdit />
-    }, width: 90 },
+        buttonIcon: <FaRegEdit />,
+        // primaryDisabled: checkPermission
+    }, 
+    width: 90,
+  }
   ]);
 
   useEffect(() => {
+    setLoading(true);
     getAllUsers().then((response) => {
       if (response.status == 200) {
         setRowData(response.data);
       }
-    });
+    }).finally(()=>setLoading(false));
   }, [refesh]);
 
+  // useEffect(()=> {
+  //   // setReRender(prev =>!prev);
+  //   console.log(gridRef?.current?.api?.refreshCells());
+    
+  // },[currentUser])
 
-  
-  return (
+  return (<>
+    {loading && <Spinner/>}
     <div className={`min-w-[800px] w-3/5 mx-auto h-full`}>
-      <div
-        className="ag-theme-quartz h-[800px] w-full mt-2" // applying the grid theme
-      >
-        <AgGridReact rowData={rowData} columnDefs={colDefs} />
+      <div  className="ag-theme-quartz h-[800px] w-full mt-2">
+        <AgGridReact ref={gridRef} rowData={rowData} columnDefs={colDefs} />
       </div>
       <div className="container mx-auto p-4">
-      {/* Display your main content here */}
-      {/* <button
-        onClick={handleOpenDialog}
-        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-      >
-        Open Dialog
-      </button> */}
-      <Dialog isOpen={isDialogOpen} onClose={handleCloseDialog} data={data} setRefresh={setRefresh}/>
+      <Dialog isOpen={isDialogOpen} onClose={handleCloseDialog} data={data} setRefresh={setRefresh} activeRolePremissions={getActiveRolePermissions(allRoles,currentUser.activeRole)}/>
     </div>
     </div>
+    </>
   );
 };
 

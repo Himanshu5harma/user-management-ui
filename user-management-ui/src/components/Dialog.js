@@ -4,8 +4,9 @@ import CustomButton from "./CustomButton";
 import CustomSecondaryButton from "./CustomSecondaryButton";
 import { getAllRoles } from "../api/RolesService";
 import { createNewUser } from "../api/UserSerice";
+import { ACCESS_MAP } from "../data/Constant";
 
-const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
+const Dialog = ({ isOpen, onClose, data, setRefresh, activeRolePremissions}) => {
   const [editedData, setEditedData] = useState(data);
   const [allRoles, setAllRoles] = useState([]);
   const [checkedRoles, setCheckedRoles] = useState({});
@@ -60,10 +61,15 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
       }
     })
     // Handle the edit action (e.g., save to backend, update state, etc.)
-    console.log("Edited data:", editedData);
     onClose();
   };
+  const checkUserEdit =()=>{
+    return ACCESS_MAP.editUser.filter(per=>activeRolePremissions?.includes(per)).length==0;
+  }
 
+  const checkGrantPermission =()=>{
+    return ACCESS_MAP.grantPermission.filter(per=>activeRolePremissions?.includes(per)).length==0;
+  }
   return (
     <div className={`fixed inset-0 ${isOpen ? "block" : "hidden"}`}>
       <div className="flex items-center justify-center min-h-screen bg-gray-800 bg-opacity-50">
@@ -83,6 +89,7 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
               value={editedData.firstName}
               onChange={handleInputChange}
               className="w-full border rounded-md p-2"
+              disabled={checkUserEdit()}
             />
           </div>
 
@@ -100,6 +107,7 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
               value={editedData.lastName}
               onChange={handleInputChange}
               className="w-full border rounded-md p-2"
+              disabled={checkUserEdit()}
             />
           </div>
 
@@ -117,6 +125,7 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
               value={editedData.birthDate}
               onChange={handleInputChange}
               className="w-full border rounded-md p-2"
+              disabled={checkUserEdit()}
             />
           </div>
 
@@ -134,6 +143,7 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
               value={editedData.userName}
               onChange={handleInputChange}
               className="w-full border rounded-md p-2"
+              disabled={checkUserEdit()}
             />
           </div>
 
@@ -154,6 +164,7 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
                 checked={checkedRoles[option.id] || false}
                 onChange={handleCheckboxChange}
                 className="w-full border rounded-md mx-2"
+                disabled={checkGrantPermission()}
               />
               {option.name}
             </label>
@@ -168,6 +179,7 @@ const Dialog = ({ isOpen, onClose, data, setRefresh}) => {
                 clickHandler={handleEdit}
                 buttonType="button"
                 buttonName="Save"
+                disabled={checkUserEdit() && checkGrantPermission()}
               />
             </div>
             <CustomSecondaryButton

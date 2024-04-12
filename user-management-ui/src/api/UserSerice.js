@@ -10,3 +10,9 @@ export const getAllUsers = async ()=>{
     return await axios.get(baseUrl+'/api/v1/users/find-all',{
         headers:{...getHeaderToken()}    });
 }
+
+export const getUserByUserName = async (userName)=>{
+    return await axios.get(baseUrl+`/api/v1/users/user-Name/${userName}`,{
+        headers:{...getHeaderToken()}
+    });
+}
